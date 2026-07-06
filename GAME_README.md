@@ -1,4 +1,4 @@
-# Untitled Quest — Game Overview
+# Beyond the stars — Game Overview
 
 A first-person 3D survival sandbox built with **Three.js r128** (loaded from a CDN).
 It runs in any modern browser — double-click `index.html` for keyboard play, or serve
