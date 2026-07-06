@@ -1,0 +1,37 @@
+{
+  "name": "untitled-quest",
+  "productName": "Untitled Quest",
+  "version": "1.0.0",
+  "description": "A first-person survival sandbox with webcam pose control.",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win"
+  },
+  "author": "Deepak Sharma",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.untitledquest.game",
+    "productName": "Untitled Quest",
+    "files": [
+      "electron-main.js",
+      "index.html",
+      "css/**/*",
+      "js/**/*",
+      "pose-model/**/*"
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.games"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

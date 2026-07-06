@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Untitled Quest — Hackathon Build</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ============================================================
+       SCREEN 1: CHARACTER CREATION / CUSTOMIZATION
+       Populated by js/customization.js
+  ============================================================= -->
+  <div id="creation-screen" class="screen">
+    <div class="creation-layout">
+      <div id="preview-pane">
+        <canvas id="preview-canvas"></canvas>
+        <p class="hint">Drag to rotate your character</p>
+      </div>
+
+      <div id="creation-panel">
+        <h1>Create Your Character</h1>
+        <p class="subtitle">Untitled Quest — a story will be written here soon.</p>
+
+        <div class="field">
+          <label for="char-name">Name</label>
+          <input id="char-name" type="text" maxlength="18" value="Wanderer" />
+        </div>
+
+        <div class="field">
+          <label>Body Type</label>
+          <div id="bodytype-options" class="option-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Skin Tone</label>
+          <div id="skin-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Suit Color</label>
+          <div id="suit-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Accent / Gear Color</label>
+          <div id="accent-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Head Gear</label>
+          <div id="headgear-options" class="option-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Hair Type</label>
+          <div id="hairstyle-options" class="option-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Hair Color</label>
+          <div id="haircolor-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="field">
+          <label for="height-slider">Height <span id="height-readout"></span></label>
+          <input id="height-slider" type="range" min="150" max="210" step="1" value="180" />
+        </div>
+
+        <div class="field">
+          <label for="class-select">Archetype <span class="tag">affects starting stats</span></label>
+          <select id="class-select"></select>
+          <p id="class-desc" class="class-desc"></p>
+        </div>
+
+        <button id="start-btn" class="primary-btn">Enter the World ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN 2: THE GAME (first-person 3D world)
+       Populated by js/world.js + js/player.js
+  ============================================================= -->
+  <div id="game-screen" class="screen hidden">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Crosshair -->
+    <div id="crosshair">+</div>
+
+    <!-- HUD (top-left): identity + progression stubs -->
+    <div id="hud">
+      <div class="hud-name" id="hud-name"></div>
+      <div class="hud-bars">
+        <div class="bar"><span>HP</span><div class="bar-track"><div id="bar-hp" class="bar-fill hp"></div></div></div>
+        <div class="bar"><span>STA</span><div class="bar-track"><div id="bar-sta" class="bar-fill sta"></div></div></div>
+        <div class="bar"><span>FOOD</span><div class="bar-track"><div id="bar-hunger" class="bar-fill hunger"></div></div></div>
+      </div>
+      <div class="hud-meta">
+        <span id="hud-level">Lv 1</span>
+        <span id="hud-xp">XP 0</span>
+        <span id="hud-coords"></span>
+      </div>
+      <div class="hud-meta">
+        <span id="hud-weapon">🪓 Axe</span>
+        <span id="hud-warmth"></span>
+      </div>
+    </div>
+
+    <!-- RPG stage tracker (top-right, above the objective banner) -->
+    <div id="stage-tracker" class="hidden"></div>
+
+    <!-- Hotbar (bottom): resource/inventory stub -->
+    <div id="hotbar"></div>
+
+    <!-- Objective banner: STORY hooks into this element -->
+    <div id="objective" class="hidden"></div>
+
+    <!-- Crafting panel (toggle with C) -->
+    <div id="craft-panel" class="hidden">
+      <div class="craft-header">
+        <span>Crafting</span>
+        <span class="craft-close">C to close</span>
+      </div>
+      <div id="craft-list"></div>
+      <div class="craft-hint">Craft placeable items, then <b>right-click</b> to build. Select a placeable in your hotbar first.</div>
+    </div>
+
+    <!-- Dialogue box (driven by the story layer via npc:talk / GAME.UI.showDialogue) -->
+    <div id="dialogue-box" class="hidden">
+      <div class="dlg-speaker" id="dlg-speaker">Stranger</div>
+      <div class="dlg-text" id="dlg-text"></div>
+      <div class="dlg-footer"><span>Press <b>E</b> or click to continue</span></div>
+    </div>
+
+    <!-- Pause / pointer-lock prompt -->
+    <div id="lock-prompt" class="overlay">
+      <div class="overlay-card">
+        <h2>Click to play</h2>
+        <table class="controls-table">
+          <tr><td>Move</td><td>W A S D</td></tr>
+          <tr><td>Look</td><td>Mouse</td></tr>
+          <tr><td>Sprint</td><td>Shift</td></tr>
+          <tr><td>Jump</td><td>Space</td></tr>
+          <tr><td>Interact</td><td>E</td></tr>
+          <tr><td>Collect / Talk</td><td>E</td></tr>
+          <tr><td>Eat food</td><td>F</td></tr>
+          <tr><td>Cook (by fire)</td><td>G</td></tr>
+          <tr><td>Craft</td><td>C</td></tr>
+          <tr><td>Place block</td><td>Right-click</td></tr>
+          <tr><td>Break block</td><td>Q</td></tr>
+          <tr><td>Switch weapon</td><td>[ ]</td></tr>
+          <tr><td>Save game</td><td>P</td></tr>
+          <tr><td>Pause</td><td>Esc</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js (classic global build — works over file://) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Game modules. Order matters: dependencies first. -->
+  <script src="js/config.js"></script>
+  <script src="js/eventBus.js"></script>
+  <script src="js/gameState.js"></script>
+  <script src="js/character.js"></script>
+  <script src="js/customization.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/story.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

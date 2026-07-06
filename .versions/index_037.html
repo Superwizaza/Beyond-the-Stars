@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Untitled Quest — Hackathon Build</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ============================================================
+       SCREEN 1: CHARACTER CREATION / CUSTOMIZATION
+       Populated by js/customization.js
+  ============================================================= -->
+  <div id="creation-screen" class="screen">
+    <div class="creation-layout">
+      <div id="preview-pane">
+        <canvas id="preview-canvas"></canvas>
+        <p class="hint">Drag to rotate your character</p>
+      </div>
+
+      <div id="creation-panel">
+        <h1>Create Your Character</h1>
+        <p class="subtitle">Untitled Quest — a story will be written here soon.</p>
+
+        <div class="field">
+          <label for="char-name">Name</label>
+          <input id="char-name" type="text" maxlength="18" value="Wanderer" />
+        </div>
+
+        <div class="field">
+          <label>Body Type</label>
+          <div id="bodytype-options" class="option-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Skin Tone</label>
+          <div id="skin-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Suit Color</label>
+          <div id="suit-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Accent / Gear Color</label>
+          <div id="accent-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Head Gear</label>
+          <div id="headgear-options" class="option-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Hair Type</label>
+          <div id="hairstyle-options" class="option-row"></div>
+        </div>
+
+        <div class="field">
+          <label>Hair Color</label>
+          <div id="haircolor-swatches" class="swatch-row"></div>
+        </div>
+
+        <div class="field">
+          <label for="height-slider">Height <span id="height-readout"></span></label>
+          <input id="height-slider" type="range" min="150" max="210" step="1" value="180" />
+        </div>
+
+        <div class="field">
+          <label for="class-select">Archetype <span class="tag">affects starting stats</span></label>
+          <select id="class-select"></select>
+          <p id="class-desc" class="class-desc"></p>
+        </div>
+
+        <button id="start-btn" class="primary-btn">Enter the World ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN 2: THE GAME (first-person 3D world)
+       Populated by js/world.js + js/player.js
+  ============================================================= -->
+  <div id="game-screen" class="screen hidden">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Crosshair -->
+    <div id="crosshair">+</div>
+
+    <!-- HUD (top-left): identity + progression stubs -->
+    <div id="hud">
+      <div class="hud-name" id="hud-name"></div>
+      <div class="hud-bars">
+        <div class="bar"><span>HP</span><div class="bar-track"><div id="bar-hp" class="bar-fill hp"></div></div></div>
+        <div class="bar"><span>SHIELD</span><div class="bar-track"><div id="bar-sta" class="bar-fill sta"></div></div></div>
+        <div class="bar"><span>FOOD</span><div class="bar-track"><div id="bar-hunger" class="bar-fill hunger"></div></div></div>
+      </div>
+      <div class="hud-meta">
+        <span id="hud-level">Lv 1</span>
+        <span id="hud-xp">XP 0</span>
+        <span id="hud-coords"></span>
+      </div>
+      <div class="hud-meta">
+        <span id="hud-weapon">🪓 Axe</span>
+        <span id="hud-warmth"></span>
+      </div>
+    </div>
+
+    <!-- RPG stage tracker (top-right, above the objective banner) -->
+    <div id="stage-tracker" class="hidden"></div>
+
+    <!-- Hotbar (bottom): resource/inventory stub -->
+    <div id="hotbar"></div>
+
+    <!-- Objective banner: STORY hooks into this element -->
+    <div id="objective" class="hidden"></div>
+
+    <!-- Crafting panel (toggle with C) -->
+    <div id="craft-panel" class="hidden">
+      <div class="craft-header">
+        <span>Crafting</span>
+        <span class="craft-close">C to close</span>
+      </div>
+      <div id="craft-list"></div>
+      <div class="craft-hint">Craft placeable items, then <b>right-click</b> to build. Select a placeable in your hotbar first.</div>
+    </div>
+
+    <!-- Dialogue box (driven by the story layer via npc:talk / GAME.UI.showDialogue) -->
+    <div id="dialogue-box" class="hidden">
+      <div class="dlg-speaker" id="dlg-speaker">Stranger</div>
+      <div class="dlg-text" id="dlg-text"></div>
+      <div class="dlg-footer"><span>Press <b>E</b> or click to continue</span></div>
+    </div>
+
+    <!-- Pause / pointer-lock prompt -->
+    <div id="lock-prompt" class="overlay">
+      <div class="overlay-card">
+        <h2>Click to play</h2>
+        <table class="controls-table">
+          <tr><td>Move</td><td>W A S D</td></tr>
+          <tr><td>Look</td><td>Mouse</td></tr>
+          <tr><td>Sprint</td><td>Shift</td></tr>
+          <tr><td>Jump</td><td>Space</td></tr>
+          <tr><td>Interact</td><td>E</td></tr>
+          <tr><td>Collect / Talk</td><td>E</td></tr>
+          <tr><td>Eat food</td><td>F</td></tr>
+          <tr><td>Cook (by fire)</td><td>G</td></tr>
+          <tr><td>Craft</td><td>C</td></tr>
+          <tr><td>Place block</td><td>Right-click</td></tr>
+          <tr><td>Break block</td><td>Q</td></tr>
+          <tr><td>Switch weapon</td><td>[ ]</td></tr>
+          <tr><td>Save game</td><td>P</td></tr>
+          <tr><td>Pause</td><td>Esc</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js (classic global build — works over file://) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Game modules. Order matters: dependencies first. -->
+  <script src="js/config.js"></script>
+  <script src="js/eventBus.js"></script>
+  <script src="js/gameState.js"></script>
+  <script src="js/character.js"></script>
+  <script src="js/customization.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/story.js"></script>
+  <script src="js/main.js"></script>
+  <!-- ===== Webcam pose control (turning module) ===== -->
+  <!-- TensorFlow.js + PoseNet: real-time keypoints for palm-slide turning (no model needed). -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@2.2.1/dist/posenet.min.js"></script>
+  <!-- Teachable Machine Pose (Phase 2: Idle/Walk/Run/Attack). Dormant until PoseControl.CFG.USE_TM_MODEL=true. -->
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+  <script src="js/poseControl.js"></script>
+  <!-- Map overlay: press M to see the whole biome map, your position, and facing. -->
+  <script>
+    (function () {
+      let open = false, overlay = null, biomeCanvas = null;
+      const N = 200;                        // biome sampling resolution (N×N)
+
+      function worldSize() {
+        return (window.GAME && GAME.Config && GAME.Config.world && GAME.Config.world.size) || 1200;
+      }
+
+      // Render the (static) biome map once to an offscreen canvas.
+      function buildBiomeCanvas() {
+        const size = worldSize();
+        const c = document.createElement('canvas');
+        c.width = N; c.height = N;
+        const ctx = c.getContext('2d');
+        const COLORS = {
+          forest: '#3a6b32', plains: '#6fae4a', desert: '#d9c48f',
+          snow: '#e8eef2', highlands: '#6e7860', swamp: '#3d4a2e',
+        };
+        if (!(window.GAME && GAME.World && GAME.World.biomeAt)) return c;
+        for (let iy = 0; iy < N; iy++) {
+          for (let ix = 0; ix < N; ix++) {
+            const wx = (ix / (N - 1) - 0.5) * size;
+            const wz = (iy / (N - 1) - 0.5) * size;
+            const b = GAME.World.biomeAt(wx, wz);
+            ctx.fillStyle = COLORS[b] || '#555';
+            ctx.fillRect(ix, iy, 1, 1);
+          }
+        }
+        return c;
+      }
+
+      function ensureOverlay() {
+        if (overlay) return;
+        overlay = document.createElement('div');
+        overlay.id = 'map-overlay';
+        Object.assign(overlay.style, {
+          position: 'fixed', inset: '0', zIndex: 80, display: 'none',
+          background: 'rgba(6,9,14,.82)', alignItems: 'center', justifyContent: 'center',
+          flexDirection: 'column', font: '13px system-ui', color: '#e6edf3',
+        });
+        overlay.innerHTML =
+          '<div style="font-size:18px;margin-bottom:8px">\u{1F5FA}\uFE0F World Map</div>' +
+          '<canvas id="map-canvas" width="520" height="520" style="border:2px solid #4ea1ff;border-radius:10px;background:#0d1117"></canvas>' +
+          '<div id="map-info" style="margin-top:8px;color:#9fb3c8"></div>' +
+          '<div style="margin-top:6px;color:#7d8ea0;font-size:11px">' +
+          'Forest \u25A0 \u00B7 Plains \u25A0 \u00B7 Desert \u25A0 \u00B7 Snow \u25A0 \u00B7 Highlands \u25A0 \u00B7 Swamp \u25A0 &nbsp;\u2014&nbsp; press M to close</div>';
+        document.body.appendChild(overlay);
+      }
+
+      function draw() {
+        if (!open) return;
+        const canvas = document.getElementById('map-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        // Biome background (scaled up from the sampled canvas).
+        if (biomeCanvas) { ctx.imageSmoothingEnabled = false; ctx.drawImage(biomeCanvas, 0, 0, W, H); }
+
+        // Player position + facing.
+        const size = worldSize();
+        const pos = GAME.Player && GAME.Player.getPosition ? GAME.Player.getPosition() : { x: 0, z: 0 };
+        const yaw = GAME.Player && GAME.Player.getYaw ? GAME.Player.getYaw() : 0;
+        const px = (pos.x / size + 0.5) * W;
+        const py = (pos.z / size + 0.5) * H;
+
+        // Facing arrow. In-game forward is (-sin(yaw), -cos(yaw)) on the XZ plane;
+        // map +y = +z, so screen-forward = (-sin(yaw), -cos(yaw)).
+        const fx = -Math.sin(yaw), fz = -Math.cos(yaw);
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(Math.atan2(fx, -fz));   // point the triangle along facing
+        ctx.fillStyle = '#ffd23f';
+        ctx.strokeStyle = '#0d1117'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -11); ctx.lineTo(7, 8); ctx.lineTo(0, 4); ctx.lineTo(-7, 8);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        // Cardinal labels.
+        ctx.fillStyle = '#cdd9e5'; ctx.font = '12px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText('N', W / 2, 14); ctx.fillText('S', W / 2, H - 4);
+        ctx.textAlign = 'left';  ctx.fillText('W', 3, H / 2);
+        ctx.textAlign = 'right'; ctx.fillText('E', W - 3, H / 2);
+
+        // Info line: coords + compass heading.
+        const deg = (Math.atan2(fx, -fz) * 180 / Math.PI + 360) % 360;
+        const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+        const compass = dirs[Math.round(deg / 45) % 8];
+        const biome = GAME.World.biomeAt ? GAME.World.biomeAt(pos.x, pos.z) : '?';
+        const info = document.getElementById('map-info');
+        if (info) info.textContent =
+          'x ' + pos.x.toFixed(0) + '   z ' + pos.z.toFixed(0) +
+          '   \u00B7   facing ' + compass + '   \u00B7   ' + biome;
+
+        if (open) requestAnimationFrame(draw);
+      }
+
+      function toggle() {
+        open = !open;
+        ensureOverlay();
+        if (open) {
+          if (!biomeCanvas) biomeCanvas = buildBiomeCanvas();
+          overlay.style.display = 'flex';
+          if (document.pointerLockElement) document.exitPointerLock();
+          draw();
+        } else {
+          overlay.style.display = 'none';
+        }
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.code === 'KeyM') { e.preventDefault(); toggle(); }
+      });
+    })();
+  </script>
+</body>
+</html>

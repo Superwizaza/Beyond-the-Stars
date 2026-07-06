@@ -1,0 +1,39 @@
+{
+  "name": "untitled-quest",
+  "version": "1.0.0",
+  "description": "Untitled Quest — first-person survival game with webcam pose control",
+  "main": "main.js",
+  "scripts": {
+    "stage": "node stage.js",
+    "start": "npm run stage && electron .",
+    "build": "npm run stage && electron-builder",
+    "build:mac": "npm run stage && electron-builder --mac",
+    "build:win": "npm run stage && electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.untitledquest.game",
+    "productName": "Untitled Quest",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "game/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.games",
+      "target": [
+        { "target": "dmg", "arch": ["arm64", "x64"] }
+      ]
+    },
+    "win": {
+      "target": [
+        { "target": "nsis" }
+      ]
+    }
+  }
+}
