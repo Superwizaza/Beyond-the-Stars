@@ -24,6 +24,7 @@
       "index.html",
       "css/**/*",
       "js/**/*",
+      "audio/**/*",
       "pose-model/**/*"
     ],
     "mac": {
